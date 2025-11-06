@@ -34,6 +34,32 @@ const getHasilAkhirPasien = async (req, res) => {
   }
 };
 
+const getHasilAkhirPasienById = async (req, res) => {
+  try {
+    const response = await HasilAkhirPasien.findOne({
+      where: {
+        id: req.params.id,
+      },
+      include: [
+        {
+          model: Users,
+          attributes: ["username", "email"],
+        }
+      ],
+    });
+
+    if (!response) return res.status(404).json({ msg: "Data tidak ditemukan" });
+
+    if (req.role !== "admin" && req.userId !== response.userId) {
+      return res.status(403).json({ msg: "Akses terlarang" });
+    }
+
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
+  }
+};
+
 const createHasilAkhirPasien = async (req, res) => {
   try {
     const userId = req.userId;
@@ -112,6 +138,7 @@ const deleteAllHasilAkhirPasien = async (req, res) => {
 
 module.exports = {
   getHasilAkhirPasien,
+  getHasilAkhirPasienById,
   createHasilAkhirPasien,
   deleteAllHasilAkhirPasien,
 };
